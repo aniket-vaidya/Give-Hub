@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Reports{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Report Generator</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Select Report Criteria</h5>
+            <form action="{{ url_for('admin.generate_report') }}" method="POST">
+                <div class="form-group mb-3">
+                    <label for="report_type"><strong>Report Type</strong></label>
+                    <select class="form-control" id="report_type" name="report_type" required>
+                        <option value="" disabled selected>-- Select a Report --</option>
+                        <option value="donations">Donations Report</option>
+                        <option value="requests">Medicine Requests Report</option>
+                    </select>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="start_date"><strong>Start Date</strong></label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="end_date"><strong>End Date</strong></label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-file-alt"></i> Generate Report
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

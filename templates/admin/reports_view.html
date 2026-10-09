@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>{{ report_title }}</h3>
+            <p class="text-muted">Generated on: {{ generation_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        </div>
+        <button class="btn btn-secondary" onclick="window.print();">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-light">
+                {% if report_type == 'donations' %}
+                <tr>
+                    <th>ID</th>
+                    <th>Donor Name</th>
+                    <th>Contact</th>
+                    <th>Medicines</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+                {% elif report_type == 'requests' %}
+                <tr>
+                    <th>ID</th>
+                    <th>NGO Name</th>
+                    <th>Beneficiaries</th>
+                    <th>Medicines</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+                {% endif %}
+            </thead>
+            <tbody>
+                {% if report_data %}
+                    {% for row in report_data %}
+                    <tr>
+                        {% if report_type == 'donations' %}
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.donor_name }}</td>
+                        <td>{{ row.email }}</td>
+                        <td>{{ row.medicines | replace(",", ", ") }}</td>
+                        <td><span class="badge bg-info text-dark">{{ row.status }}</span></td>
+                        <td>{{ row.created_at.strftime('%Y-%m-%d') }}</td>
+                        {% elif report_type == 'requests' %}
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.ngo_name }}</td>
+                        <td>{{ row.num_beneficiaries }}</td>
+                        <td>{{ row.medicines | replace(",", ", ") }}</td>
+                        <td><span class="badge bg-warning text-dark">{{ row.status }}</span></td>
+                        <td>{{ row.created_at.strftime('%Y-%m-%d') }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No records found for the selected criteria.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-4">
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-primary">&larr; Back to Report Generator</a>
+    </div>
+</div>
+{% endblock %}

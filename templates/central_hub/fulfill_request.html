@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Request Fulfillment{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Confirm Fulfillment for Request #{{ request_data.id }}</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Requesting NGO:</strong> {{ request_data.ngo_name }}</p>
+            <p><strong>Description:</strong> {{ request_data.description }}</p>
+            
+            <hr>
+
+            <h4>Medicines Required:</h4>
+            <p>Please confirm that you have sufficient stock. Clicking 'Confirm' will deduct these quantities from your inventory.</p>
+
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Medicine Name</th>
+                        <th>Quantity Required</th>
+                        <th>Quantity Available</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in medicines_data %}
+                    <tr class="{{ 'table-danger' if med.quantity_available < med.quantity_requested }}">
+                        <td>{{ med.name }}</td>
+                        <td>{{ med.quantity_requested }}</td>
+                        <td>
+                            <strong>{{ med.quantity_available }}</strong>
+                            {% if med.quantity_available < med.quantity_requested %}
+                                <span class="badge badge-danger ml-2">Insufficient Stock!</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3">No medicines listed for this request.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="mt-4">
+                <form action="{{ url_for('central_hub.fulfill_request_from_hub', request_id=request_data.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i> Confirm & Fulfill Request
+                    </button>
+                </form>
+                
+                <a href="{{ url_for('central_hub.dashboard') }}" class="btn btn-secondary d-inline">
+                    <i class="fas fa-times-circle"></i> Cancel
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

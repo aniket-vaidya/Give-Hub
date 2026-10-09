@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Request Medicines{% endblock %}
+
+{% block content %}
+<div class="form-container card">
+    <h2>Request Medicines for Beneficiaries</h2>
+    <form action="{{ url_for('ngo.request_medicine') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Your Name (Requester)</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="location">Delivery Address</label>
+            <textarea id="location" name="location" rows="3" required></textarea>
+        </div>
+        <hr>
+        <div class="form-group">
+            <label for="num_beneficiaries">How many beneficiaries need medicine?</label>
+            <input type="number" id="num_beneficiaries" name="num_beneficiaries" min="1" class="form-control" onchange="generateBeneficiaryFields()">
+        </div>
+
+        <div id="beneficiaries-container"></div>
+
+        <button type="submit" class="btn-primary">Submit Request</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function generateBeneficiaryFields() {
+    const num = document.getElementById('num_beneficiaries').value;
+    const container = document.getElementById('beneficiaries-container');
+    container.innerHTML = ''; 
+
+    for (let i = 1; i <= num; i++) {
+        const beneficiaryDiv = document.createElement('div');
+        beneficiaryDiv.className = 'beneficiary-card';
+        beneficiaryDiv.innerHTML = `
+            <h4>Beneficiary ${i}</h4>
+            <div class="form-group">
+                <label for="beneficiary_name_${i}">Name</label>
+                <input type="text" name="beneficiary_name_${i}" required>
+            </div>
+            <div class="form-group">
+                <label for="beneficiary_age_${i}">Age</label>
+                <input type="number" name="beneficiary_age_${i}" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="beneficiary_sex_${i}">Sex</label>
+                <select name="beneficiary_sex_${i}" required>
+                    <option value="">Select...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="doctor_letter_${i}">Doctor's Prescription (PDF)</label>
+                <input type="file" name="doctor_letter_${i}" accept=".pdf" required>
+            </div>
+            <div class="form-group">
+                <label for="num_medicines_${i}">How many different medicines does this person need?</label>
+                <input type="number" name="num_medicines_${i}" min="1" onchange="generateNgoMedicineFields(${i})">
+            </div>
+            <div id="ngo-medicines-container-${i}"></div>
+        `;
+        container.appendChild(beneficiaryDiv);
+    }
+}
+
+function generateNgoMedicineFields(beneficiaryIndex) {
+    const numMeds = document.querySelector(`input[name='num_medicines_${beneficiaryIndex}']`).value;
+    const medContainer = document.getElementById(`ngo-medicines-container-${beneficiaryIndex}`);
+    medContainer.innerHTML = '';
+
+    for (let j = 1; j <= numMeds; j++) {
+        const medicineDiv = document.createElement('div');
+        medicineDiv.className = 'medicine-fields';
+        medicineDiv.innerHTML = `
+            <h5>Medicine ${j}</h5>
+            <div class="form-group">
+                <label>Medicine Name</label>
+                <input type="text" name="request_medicine_name_${beneficiaryIndex}_${j}" required>
+            </div>
+            <div class="form-group">
+                <label>Quantity Needed</label>
+                <input type="number" name="request_quantity_${beneficiaryIndex}_${j}" min="1" required>
+            </div>
+        `;
+        medContainer.appendChild(medicineDiv);
+    }
+}
+</script>
+{% endblock %}

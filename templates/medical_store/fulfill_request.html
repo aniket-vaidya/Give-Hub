@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Fulfill Request #{{ request_data.id }}{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3>Fulfill Request #{{ request_data.id }} from Store Inventory</h3>
+        </div>
+        <div class="card-body">
+            <p>You are about to fulfill the following request for <strong>{{ request_data.requester_name }}</strong>. Please review your store's stock availability below.</p>
+            
+            <h5 class="mt-4">Stock Check:</h5>
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Medicine Name</th>
+                        <th>Quantity Needed</th>
+                        <th>Quantity Available in Your Store</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set can_fulfill = True %}
+                    {% for med in medicines_needed %}
+                    <tr>
+                        <td>{{ med.medicine_name }}</td>
+                        <td>{{ med.quantity_needed }}</td>
+                        <td>{{ med.quantity_available }}</td>
+                        <td>
+                            {% if med.quantity_available >= med.quantity_needed %}
+                                <span class="badge bg-success">In Stock</span>
+                            {% else %}
+                                <span class="badge bg-danger">Insufficient Stock</span>
+                                {% set can_fulfill = False %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if not can_fulfill %}
+            <div class="alert alert-danger mt-4">
+                <strong>Cannot Fulfill:</strong> You do not have enough stock for one or more requested medicines. Please contact the Central Hub if you cannot fulfill this request.
+            </div>
+            {% else %}
+            <div class="alert alert-warning mt-4">
+                <strong>Warning:</strong> This action will permanently deduct the medicine quantities from your store's inventory. This cannot be undone.
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('medical_store.fulfill_request', request_id=request_data.id) }}">
+                <button type="submit" class="btn btn-success" {% if not can_fulfill %}disabled{% endif %}>
+                    Confirm and Fulfill Request
+                </button>
+                <a href="{{ url_for('medical_store.dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

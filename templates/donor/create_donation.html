@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Donate Medicines{% endblock %}
+
+{% block content %}
+<div class="form-container card">
+    <h2>Donate Your Surplus Medicines</h2>
+    <p>Please fill out the form below to start your donation process. Your contribution can make a significant difference.</p>
+    
+    <!-- This form is a simplified version. Integrate your pincode logic here. -->
+    <form action="{{ url_for('donor.donation') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="donor_name">Your Full Name</label>
+            <input type="text" id="donor_name" name="donor_name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Your Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="contact_number">Contact Number</label>
+            <input type="tel" id="contact_number" name="contact_number" required>
+        </div>
+        <div class="form-group">
+            <label for="address">Your Full Address</label>
+            <textarea id="address" name="address" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="medical_store_id">Select Nearest Medical Store</label>
+            <select name="medical_store_id" id="medical_store_id" required>
+                <option value="">-- Please select a store --</option>
+                {% for store in medical_stores %}
+                    <option value="{{ store.id }}">{{ store.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <hr>
+        <h4>Medicine Details</h4>
+        <div class="form-group">
+            <label for="num_medicines">How many different types of medicine are you donating?</label>
+            <input type="number" id="num_medicines" name="num_medicines" min="1" onchange="generateMedicineFields('donation-medicines-container', this.value)">
+        </div>
+        <div id="donation-medicines-container"></div>
+
+        <button type="submit" class="btn-primary">Submit Donation</button>
+    </form>
+</div>
+
+<script>
+function generateMedicineFields(containerId, num) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    for (let i = 0; i < num; i++) {
+        container.innerHTML += `
+            <div class="medicine-fields">
+                <h5>Medicine ${i + 1}</h5>
+                <div class="form-group">
+                    <label for="medicine_name_${i}">Medicine Name</label>
+                    <input type="text" name="medicine_name_${i}" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity_${i}">Quantity</label>
+                    <input type="number" name="quantity_${i}" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="expiry_date_${i}">Expiry Date</label>
+                    <input type="date" name="expiry_date_${i}" required>
+                </div>
+                 <div class="form-group">
+                    <label for="image_${i}">Image of Medicine (Optional)</label>
+                    <input type="file" name="image_${i}">
+                </div>
+            </div>
+        `;
+    }
+}
+</script>
+{% endblock %}

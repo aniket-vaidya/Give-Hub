@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Central Hub Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Central Hub Dashboard</h2>
+        <a href="{{ url_for('central_hub.stock_overview') }}" class="btn btn-info">
+            <i class="fas fa-warehouse"></i> View All Stock
+        </a>
+    </div>
+
+    <!-- Section 1 & 2: Donations and Pending Requests -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header"><h4>Donations to Collect</h4></div>
+                <div class="card-body">
+                    {% for donation in assigned_donations %}
+                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Donation #{{ donation.id }}</strong> from {{ donation.donor_name }}<br>
+                                <small>At: {{ donation.medical_store_name }}</small>
+                            </div>
+                            <form action="{{ url_for('central_hub.confirm_donation', donation_id=donation.id) }}" method="POST">
+                                <button type="submit" class="btn btn-primary btn-sm">Confirm Collection</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No donations awaiting collection.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header"><h4>Pending NGO Requests</h4></div>
+                <div class="card-body">
+                    {% for req in pending_requests %}
+                        <div class="alert alert-warning d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Request #{{ req.id }}</strong> from {{ req.ngo_name }}<br>
+                                <small>On: {{ req.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <div>
+                                <form action="{{ url_for('central_hub.approve_request', request_id=req.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                </form>
+                                <form action="{{ url_for('central_hub.reject_request', request_id=req.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No requests pending approval.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        {% for request in approved_requests %}
+<tr>
+    <td>{{ request.id }}</td>
+    <td>{{ request.ngo_name }}</td>
+    <td>{{ request.description }}</td>
+    <td>{{ request.status }}</td>
+    <td>
+        <a href="{{ url_for('central_hub.view_request_details', request_id=request.id) }}" class="btn btn-info btn-sm">Details</a>
+
+        {% if request.status == 'Approved by CH' %}
+            <form action="{{ url_for('central_hub.manage_assignment', request_id=request.id) }}" method="POST" class="d-inline-block mt-2">
+                <select name="medical_store_id" class="form-control-sm" required>
+                    <option value="">-- Select Store --</option>
+                    {% for store in medical_stores %}
+                    <option value="{{ store.id }}">{{ store.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Assign</button>
+            </form>
+            
+            <a href="{{ url_for('central_hub.fulfill_request_from_hub', request_id=request.id) }}" class="btn btn-success btn-sm mt-2">Fulfill from Hub</a>
+
+        {% elif request.status == 'Assigned to MS' %}
+            <p class="mb-1">
+                <strong>Currently Assigned to:</strong> {{ request.medical_store_name }}
+            </p>
+            
+            <form action="{{ url_for('central_hub.manage_assignment', request_id=request.id) }}" method="POST" class="d-inline-block">
+                <select name="medical_store_id" class="form-control-sm" required>
+                    <option value="">-- Re-assign to --</option>
+                    {% for store in medical_stores %}
+                    <option value="{{ store.id }}">{{ store.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-warning btn-sm">Re-assign</button>
+            </form>
+
+            <form action="{{ url_for('central_hub.fulfill_request_from_hub', request_id=request.id) }}" method="POST" class="d-inline-block">
+                <button type="submit" class="btn btn-success btn-sm">Fulfill from Hub Instead</button>
+            </form>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+
+    <!-- Section 3: Approved Requests -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header"><h4>Approved Requests - Ready for Fulfillment</h4></div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Request ID</th>
+                                <th>NGO Name</th>
+                                <th>Fulfillment Options</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in approved_requests %}
+                            <tr>
+                                <td>{{ req.id }}</td>
+                                <td>{{ req.ngo_name }}</td>
+                                <td>
+                                    {% if req.status == 'Approved by CH' %}
+                                    <!-- Option 1: Fulfill from Hub -->
+                                    <a href="{{ url_for('central_hub.fulfill_request_from_hub', request_id=req.id) }}" class="btn btn-success btn-sm mb-2">
+                                        Fulfill from Hub
+                                    </a>
+                                    <!-- Option 2: Assign to Store -->
+                                    <form action="{{ url_for('central_hub.manage_assignment', request_id=req.id) }}" method="POST" class="form-inline d-inline">
+                                        <div class="input-group">
+                                            <select name="medical_store_id" class="form-control form-control-sm">
+                                                <option selected disabled>or Assign to a Store...</option>
+                                                {% for store in medical_stores %}
+                                                    <option value="{{ store.id }}">{{ store.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm">Assign</button>
+                                        </div>
+                                    </form>
+                                    {% else %}
+                                        <span class="badge bg-info">Assigned to {{ req.medical_store_name }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No requests are currently approved.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

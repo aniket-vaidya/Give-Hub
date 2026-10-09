@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Donation Details #{{ donation.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3>Donation Details - ID #{{ donation.id }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Donor Information</h5>
+                    <p><strong>Name:</strong> {{ donation.donor_name }}</p>
+                    <p><strong>Email:</strong> {{ donation.email }}</p>
+                    <p><strong>Contact:</strong> {{ donation.contact_number }}</p>
+                    <p><strong>Address:</strong> {{ donation.address }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Donation Status</h5>
+                    <p><strong>Overall Status:</strong> <span class="badge bg-primary">{{ donation.status }}</span></p>
+                    <p><strong>Assigned Medical Store:</strong> {{ donation.medical_store_name or 'N/A' }}</p>
+                    <p><strong>Medical Store Status:</strong> {{ donation.medical_store_status }}</p>
+                    <p><strong>Central Hub Status:</strong> {{ donation.central_hub_status }}</p>
+                    <p><strong>Donated On:</strong> {{ donation.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+            <hr>
+            <h5>Medicines in this Donation</h5>
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Medicine Name</th>
+                        <th>Quantity</th>
+                        <th>Expiry Date</th>
+                        <th>Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in medicines %}
+                    <tr>
+                        <td>{{ med.medicine_name }}</td>
+                        <td>{{ med.quantity }}</td>
+                        <td>{{ med.expiry_date.strftime('%Y-%m-%d') if med.expiry_date else 'N/A' }}</td>
+                        <td>
+                            {% if med.image_filename %}
+                            <a href="{{ url_for('uploads.get_uploaded_image', filename=med.image_filename) }}" target="_blank">View Image</a>
+                            {% else %}
+                            No Image
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

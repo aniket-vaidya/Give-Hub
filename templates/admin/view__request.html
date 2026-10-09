@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Request Details #{{ request_data.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3>Request Details - ID #{{ request_data.id }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Requesting NGO Information</h5>
+                    <p><strong>NGO Name:</strong> {{ request_data.ngo_name }}</p>
+                    <p><strong>Requester Name:</strong> {{ request_data.requester_name }}</p>
+                    <p><strong>Address:</strong> {{ request_data.address }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Request Status</h5>
+                    <p><strong>Overall Status:</strong> <span class="badge bg-warning">{{ request_data.status }}</span></p>
+                    <p><strong>Assigned Medical Store:</strong> {{ request_data.medical_store_name or 'N/A' }}</p>
+                    <p><strong>Number of Beneficiaries:</strong> {{ request_data.num_beneficiaries }}</p>
+                    <p><strong>Requested On:</strong> {{ request_data.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+            <hr>
+            <h5>Requested Medicines</h5>
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Medicine Name</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in medicines %}
+                    <tr>
+                        <td>{{ med.medicine }}</td>
+                        <td>{{ med.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+            <h5>Beneficiaries</h5>
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Sex</th>
+                        <th>Prescription</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ben in beneficiaries %}
+                    <tr>
+                        <td>{{ ben.beneficiary_name }}</td>
+                        <td>{{ ben.age }}</td>
+                        <td>{{ ben.sex }}</td>
+                        <td>
+                            {% if ben.doctor_prescription_path %}
+                                <a href="{{ url_for('uploads.get_prescription', filename=ben.doctor_prescription_path) }}" target="_blank">View Prescription</a>
+                            {% else %}
+                                Not Provided
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

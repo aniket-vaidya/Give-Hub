@@ -1,0 +1,31 @@
+<header>
+    <nav id="desktop-nav">
+        <ul>
+            <li><a href="{{ url_for('main.index') }}"><button>Home</button></a></li>
+            <li><a href="{{ url_for('main.index') }}#about-us"><button>About us</button></a></li>
+            <li><a href="{{ url_for('main.index') }}#contact-us"><button>Contact us</button></a></li>
+        </ul>
+
+             <div id="logo-container">
+             <img id="logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+            </div>
+
+        <div class="nav-right-buttons">
+            {% if session.loggedin %}
+                {% if session.role == 'Admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}"><button>Admin Dashboard</button></a>
+                {% elif session.role == 'Medical Store' %}
+                    <a href="{{ url_for('medical_store.dashboard') }}"><button>MS Dashboard</button></a>
+                {% elif session.role == 'Central Hub' %}
+                    <a href="{{ url_for('central_hub.dashboard') }}"><button>Hub Dashboard</button></a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}"><button>Logout</button></a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}"><button>Login</button></a>
+                <a href="{{ url_for('auth.register') }}"><button>Register</button></a>
+            {% endif %}
+        </div>
+       
+    </nav>
+    <!-- Add your mobile nav HTML here if needed -->
+</header>
